@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>FStore Temp Mail</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 40px 10px;
+      background-color: #d0fafa;
+      font-family: 'Segoe UI', sans-serif;
+      color: #333;
+    }
+
+    .container {
+      max-width: 400px;
+      margin: auto;
+      background: white;
+      padding: 30px 20px;
+      border-radius: 30px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .container img.logo {
+      max-width: 220px;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      text-align: left;
+      font-weight: 500;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      font-size: 1rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 15px;
+      font-size: 1rem;
+      background-color: #0097a7;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #007c8a;
+    }
+
+    .copy-btn {
+      background-color: #00838f;
+    }
+
+    #emails {
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .mail {
+      background-color: #f1f1f1;
+      border-left: 4px solid #0097a7;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 style="font-size: 28px; margin-bottom: 20px;">F-STORE OFFICIAL</h1>
+
+    <label for="customName">Masukkan nama email:</label>
+    <input type="text" id="customName" placeholder="misal : fstore">
+
+    <button onclick="setupEmail()">Buat Email</button>
+
+    <label>Email Anda:</label>
+    <input id="email" readonly>
+
+    <button class="copy-btn" onclick="copyEmail()">📋 Salin Email</button>
+    <button onclick="loadEmails()">Refresh</button>
+
+    <div id="emails">Belum ada email.</div>
+  </div>
+
+  <script>
+    let token = '', email = '', id = '', domain = '';
+
+    async function getDomain() {
+      const res = await fetch('https://api.mail.tm/domains');
+      const data = await res.json();
+      domain = data['hydra:member'][0].domain;
+    }
+
+    async function setupEmail() {
+      await getDomain();
+      const name = document.getElementById("customName").value.trim().toLowerCase();
+      if (!name) return alert("Nama email tidak boleh kosong");
+      email = `${name}@${domain}`;
+      document.getElementById("email").value = email;
+      localStorage.setItem("my_temp_email", email);
+
+      try {
+        await fetch('https://api.mail.tm/accounts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ address: email, password: "temppass" })
+        });
+      } catch {}
+
+      const login = await fetch('https://api.mail.tm/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address: email, password: "temppass" })
+      });
+
+      const loginData = await login.json();
+      token = loginData.token;
+
+      const me = await fetch('https://api.mail.tm/me', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const meData = await me.json();
+      id = meData.id;
+
+      loadEmails();
+    }
+
+    async function loadEmails() {
+      if (!token) return alert("Buat email dulu ya!");
+      const res = await fetch('https://api.mail.tm/messages', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      const list = data['hydra:member'];
+      const box = document.getElementById('emails');
+
+      if (list.length === 0) return box.innerHTML = "Belum ada email.";
+      box.innerHTML = '';
+      for (const mail of list) {
+        const res = await fetch(`https://api.mail.tm/messages/${mail.id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const detail = await res.json();
+        box.innerHTML += `
+          <div class="mail">
+            <b>Dari:</b> ${detail.from.address}<br>
+            <b>Subjek:</b> ${detail.subject}<br>
+            <p>${detail.text || '(tidak ada isi)'}</p>
+          </div>
+        `;
+      }
+    }
+
+    function copyEmail() {
+      const input = document.getElementById("email");
+      input.select();
+      document.execCommand("copy");
+      alert("📋 Email disalin: " + input.value);
+    }
+
+    window.onload = async () => {
+      const savedEmail = localStorage.getItem("my_temp_email");
+      if (savedEmail) {
+        document.getElementById("customName").value = savedEmail.split("@")[0];
+        await setupEmail();
+        setInterval(loadEmails, 15000);
+      }
+    }
+  </script>
+</body>
+</html>
