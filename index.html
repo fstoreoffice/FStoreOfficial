@@ -44,11 +44,9 @@
     }
 
     button {
-      width: 100%;
       padding: 12px;
-      margin-top: 15px;
       font-size: 1rem;
-      background-color: #0097a7;
+      background-color: #78c2c4;
       color: white;
       border: none;
       border-radius: 5px;
@@ -56,11 +54,21 @@
     }
 
     button:hover {
-      background-color: #007c8a;
+      background-color: #5aa6a8;
     }
 
     .copy-btn {
-      background-color: #00838f;
+      background-color: #78c2c4;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .button-row button {
+      flex: 1;
     }
 
     #emails {
@@ -70,177 +78,145 @@
 
     .mail {
       background-color: #f1f1f1;
-      border-left: 4px solid #0097a7;
+      border-left: 4px solid #78c2c4;
       padding: 10px;
       border-radius: 5px;
       margin-top: 10px;
     }
   </style>
-
-<style>
-  nav a:hover {
-    transform: scale(1.1);
-    transition: all 0.2s ease-in-out;
-  }
-</style>
-
-
-<style>
-  @media (max-width: 600px) {
-    .header {
-      padding: 20px 10px;
-    }
-
-    .header img.logo {
-      max-width: 120px !important;
-    }
-
-    nav {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    nav a {
-      font-size: 16px;
-      display: inline-block;
-    }
-
-    .container {
-      max-width: 95% !important;
-      padding: 20px 15px;
-    }
-  }
-</style>
-
 </head>
 <body>
-  
 
 <div class="header" style="width: 100%; background: white; padding: 30px 0 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); text-align: center;">
   <img src="logo.jpg" class="logo" style="max-width: 180px;">
-  
-  
-<nav style="margin-top: 10px; font-size: 16px;">
-  <a href="/" style="margin: 0 10px; text-decoration: none; color: #0097a7; font-weight: 600;">Home</a>
-  ✦
-  <a href="https://sociabuzz.com/pebrian002" style="margin: 0 10px; text-decoration: none; color: #0097a7; font-weight: 600;" target="_blank">Donate</a>
-  ✦
-  <a href="https://wa.me/+6285133334542" target="_blank" style="margin: 0 10px; text-decoration: none; color: #0097a7; font-weight: 600;">WhatsApp</a>
-</nav>
-
+  <nav style="margin-top: 10px; font-size: 16px;">
+    <a href="/" style="margin: 0 10px; text-decoration: none; color: #0097a7; font-weight: 600;">Home</a>
+    ✦
+    <a href="https://sociabuzz.com/pebrian002" style="margin: 0 10px; text-decoration: none; color: #0097a7; font-weight: 600;" target="_blank">Donate</a>
+    ✦
+    <a href="https://wa.me/+6285133334542" target="_blank" style="margin: 0 10px; text-decoration: none; color: #0097a7; font-weight: 600;">WhatsApp</a>
+  </nav>
 </div>
 
 <div class="container">
-
-<div style="text-align:center; margin-bottom: 20px;">
-  <p style="margin: 0; font-size: 16px; color: #555;">
-    <strong>Email Sementara Gratis dari F-Store</strong><br>
-    gunakan dengan bijak ya 🤗
-  </p>
-</div>
-
-
-    <h1 style="font-size: 28px; margin-bottom: 20px;"></h1>
-
-    <label for="customName">Masukkan nama email:</label>
-    <input type="text" id="customName" placeholder="misal : fstore">
-
-    <button onclick="setupEmail()">Buat Email</button>
-
-    <label>Email Anda:</label>
-    <input id="email" readonly>
-
-    <button class="copy-btn" onclick="copyEmail()">📋 Salin Email</button>
-    <button onclick="loadEmails()">Refresh</button>
-
-    <div id="emails">Belum ada email.</div>
+  <div style="text-align:center; margin-bottom: 20px;">
+    <p style="margin: 0; font-size: 16px; color: #555;">
+      <strong>Email Sementara Gratis dari F-Store</strong><br>
+      gunakan dengan bijak ya 🤗
+    </p>
   </div>
 
-  <script>
-    let token = '', email = '', id = '', domain = '';
+  <h1 style="font-size: 28px; margin-bottom: 20px;"></h1>
 
-    async function getDomain() {
-      const res = await fetch('https://api.mail.tm/domains');
-      const data = await res.json();
-      domain = data['hydra:member'][0].domain;
-    }
+  <label for="customName">Masukkan nama email:</label>
+  <input type="text" id="customName" placeholder="misal : fstore">
 
-    async function setupEmail() {
-      await getDomain();
-      const name = document.getElementById("customName").value.trim().toLowerCase();
-      if (!name) return alert("Nama email tidak boleh kosong");
-      email = `${name}@${domain}`;
-      document.getElementById("email").value = email;
-      localStorage.setItem("my_temp_email", email);
+  <button onclick="setupEmail()" style="width: 100%; margin-top: 15px;">Buat Email</button>
 
-      try {
-        await fetch('https://api.mail.tm/accounts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ address: email, password: "temppass" })
-        });
-      } catch {}
+  <label>Email Anda:</label>
+  <input id="email" readonly>
 
-      const login = await fetch('https://api.mail.tm/token', {
+  <div class="button-row">
+    <button class="copy-btn" onclick="copyEmail()">📋 Salin Email</button>
+    <button onclick="generateRandomEmail()">🔀 Random Email</button>
+  </div>
+
+  <button onclick="loadEmails()" style="width: 100%; margin-top: 15px;">Refresh</button>
+
+  <div id="emails">Belum ada email.</div>
+</div>
+
+<script>
+  let token = '', email = '', id = '', domain = '';
+
+  async function getDomain() {
+    const res = await fetch('https://api.mail.tm/domains');
+    const data = await res.json();
+    domain = data['hydra:member'][0].domain;
+  }
+
+  async function setupEmail() {
+    await getDomain();
+    const name = document.getElementById("customName").value.trim().toLowerCase();
+    if (!name) return alert("Nama email tidak boleh kosong");
+    email = `${name}@${domain}`;
+    document.getElementById("email").value = email;
+    localStorage.setItem("my_temp_email", email);
+
+    try {
+      await fetch('https://api.mail.tm/accounts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ address: email, password: "temppass" })
       });
+    } catch {}
 
-      const loginData = await login.json();
-      token = loginData.token;
+    const login = await fetch('https://api.mail.tm/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ address: email, password: "temppass" })
+    });
 
-      const me = await fetch('https://api.mail.tm/me', {
+    const loginData = await login.json();
+    token = loginData.token;
+
+    const me = await fetch('https://api.mail.tm/me', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const meData = await me.json();
+    id = meData.id;
+
+    loadEmails();
+  }
+
+  async function loadEmails() {
+    if (!token) return alert("Buat email dulu ya!");
+    const res = await fetch('https://api.mail.tm/messages', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+    const list = data['hydra:member'];
+    const box = document.getElementById('emails');
+
+    if (list.length === 0) return box.innerHTML = "Belum ada email.";
+    box.innerHTML = '';
+    for (const mail of list) {
+      const res = await fetch(`https://api.mail.tm/messages/${mail.id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      const meData = await me.json();
-      id = meData.id;
-
-      loadEmails();
+      const detail = await res.json();
+      box.innerHTML += `
+        <div class="mail">
+          <b>Dari:</b> ${detail.from.address}<br>
+          <b>Subjek:</b> ${detail.subject}<br>
+          <p>${detail.text || '(tidak ada isi)'}</p>
+        </div>
+      `;
     }
+  }
 
-    async function loadEmails() {
-      if (!token) return alert("Buat email dulu ya!");
-      const res = await fetch('https://api.mail.tm/messages', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await res.json();
-      const list = data['hydra:member'];
-      const box = document.getElementById('emails');
+  function copyEmail() {
+    const input = document.getElementById("email");
+    input.select();
+    document.execCommand("copy");
+    alert("📋 Email disalin: " + input.value);
+  }
 
-      if (list.length === 0) return box.innerHTML = "Belum ada email.";
-      box.innerHTML = '';
-      for (const mail of list) {
-        const res = await fetch(`https://api.mail.tm/messages/${mail.id}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const detail = await res.json();
-        box.innerHTML += `
-          <div class="mail">
-            <b>Dari:</b> ${detail.from.address}<br>
-            <b>Subjek:</b> ${detail.subject}<br>
-            <p>${detail.text || '(tidak ada isi)'}</p>
-          </div>
-        `;
-      }
+  function generateRandomEmail() {
+    const random = Math.random().toString(36).substring(2, 10);
+    document.getElementById("customName").value = random;
+    setupEmail();
+  }
+
+  window.onload = async () => {
+    const savedEmail = localStorage.getItem("my_temp_email");
+    if (savedEmail) {
+      document.getElementById("customName").value = savedEmail.split("@")[0];
+      await setupEmail();
+      setInterval(loadEmails, 15000);
     }
+  }
+</script>
 
-    function copyEmail() {
-      const input = document.getElementById("email");
-      input.select();
-      document.execCommand("copy");
-      alert("📋 Email disalin: " + input.value);
-    }
-
-    window.onload = async () => {
-      const savedEmail = localStorage.getItem("my_temp_email");
-      if (savedEmail) {
-        document.getElementById("customName").value = savedEmail.split("@")[0];
-        await setupEmail();
-        setInterval(loadEmails, 15000);
-      }
-    }
-  </script>
 </body>
 </html>
